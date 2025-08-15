@@ -2,6 +2,12 @@ import secrets
 import string
 import argparse
 
+try:
+    import pyperclip
+    HAS_PYPERCLIP = True
+except ImportError:
+    HAS_PYPERCLIP = False
+
 def generate_password(length=12, use_upper=True, use_digits=True, use_special=True):
     chars = string.ascii_lowercase
     if use_upper:
@@ -21,22 +27,16 @@ def main():
     parser = argparse.ArgumentParser(
         description="Customizable password generator"
     )
-    parser.add_argument(
-        "-l", "--length", type=int, default=12,
-        help="Password length (default: 12)"
-    )
-    parser.add_argument(
-        "-U", "--no-upper", action="store_false", dest="use_upper",
-        help="Exclude uppercase letters"
-    )
-    parser.add_argument(
-        "-D", "--no-digits", action="store_false", dest="use_digits",
-        help="Exclude digits"
-    )
-    parser.add_argument(
-        "-S", "--no-special", action="store_false", dest="use_special",
-        help="Exclude special characters"
-    )
+    parser.add_argument("-l", "--length", type=int, default=12,
+                        help="Password length (default: 12)")
+    parser.add_argument("-U", "--no-upper", action="store_false", dest="use_upper",
+                        help="Exclude uppercase letters")
+    parser.add_argument("-D", "--no-digits", action="store_false", dest="use_digits",
+                        help="Exclude digits")
+    parser.add_argument("-S", "--no-special", action="store_false", dest="use_special",
+                        help="Exclude special characters")
+    parser.add_argument("-c", "--copy", action="store_true",
+                        help="Copy the generated password to the clipboard (requires pyperclip)")
 
     args = parser.parse_args()
 
@@ -48,6 +48,13 @@ def main():
             use_special=args.use_special
         )
         print("🔐 Generated password:", pwd)
+
+        if args.copy:
+            if HAS_PYPERCLIP:
+                pyperclip.copy(pwd)
+                print("📋 Password copied to clipboard!")
+            else:
+                print("⚠️ pyperclip not installed. Cannot copy to clipboard.")
     except ValueError as e:
         print("Error:", e)
 
